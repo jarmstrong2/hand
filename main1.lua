@@ -14,7 +14,7 @@ require 'cunn'
 torch.manualSeed(123)
 
 -- get dataset
-dataFile = torch.DiskFile('data_norm_mean_thresh.asc', 'r')
+dataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
 handwritingdata = dataFile:readObject()
 dataSize = #handwritingdata
 
