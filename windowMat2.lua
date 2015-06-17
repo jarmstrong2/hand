@@ -2,14 +2,8 @@ require 'nn'
 
 local Window, Parent = torch.class('nn.Window', 'nn.Module')
 
-
-function Window:setmask(mask)
-    self.mask = mask
-end
-
-
 function Window:updateOutput(input)
-    local input_h1, context, kappas_t_1 = unpack(input)
+    local input_h1, context, kappas_t_1, _ = unpack(input)
     self.kappas_t_1 = kappas_t_1
 
     self.cu = context
@@ -58,7 +52,7 @@ function Window:updateOutput(input)
 end
 
 function Window:updateGradInput(input, gradOutput)
-    local input_h1, context, kappas_t_1 = unpack(input)
+    local input_h1, context, kappas_t_1, mask = unpack(input)
     local grad_output, d_kappas_t_plus_1 = unpack(gradOutput)
     
     local input_cp = input_h1:clone()
@@ -73,9 +67,10 @@ function Window:updateGradInput(input, gradOutput)
     
     local sampleSize = (#alphas_t)[1]
 
-    local context_mask_final = context:sum(3):resize(context:size(1), 1, context:size(2)):expand(sampleSize, 10, self.cu_size)
-    local context_mask = context:sum(3):expand(sampleSize, self.cu_size, self.vocab_size)
-
+    local context_mask_final = mask:sum(3):resize(context:size(1), 1, context:size(2)):expand(sampleSize, 10, self.cu_size)
+    local context_mask = mask:sum(3):resize(context:size(1),context:size(2),1):expand(sampleSize, self.cu_size, self.vocab_size)
+    --print(context_mask_final)
+    --print(context_mask)
    
     -- calculate epsilon(k,t,u)
     
