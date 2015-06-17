@@ -80,7 +80,8 @@ function Window:updateGradInput(input, gradOutput)
     local cu_resized = self.cu:clone()
     
     local calc = torch.cmul(gradOutput_expanded:cuda(), cu_resized:cuda())
-    calc = calc:cmul(context_mask):sum(3):squeeze(3)
+    --calc = calc:cmul(context_mask):sum(3):squeeze(3)
+    calc = calc:sum(3):squeeze(3)
     
     local gradSum = calc:clone():resize(sampleSize, 1, self.cu_size)
     :expand(sampleSize, 10, self.cu_size)
@@ -105,7 +106,7 @@ function Window:updateGradInput(input, gradOutput)
 
 
     local epsilon = torch.cmul(calc, gradSum)
-    epsilon:cmul(context_mask_final)
+    --epsilon:cmul(context_mask_final)
     
     --compute dl_dalphas_hat 
     local dl_dalphas_hat = torch.sum(epsilon, 3):squeeze(3)
@@ -113,13 +114,13 @@ function Window:updateGradInput(input, gradOutput)
     --compute dl_dbetas_hat
     local dl_dbetas_hat = torch.pow(kappas_t_expanded - u_expanded, 2)
     dl_dbetas_hat:cmul(epsilon)
-    dl_dbetas_hat:cmul(context_mask_final)
+    --dl_dbetas_hat:cmul(context_mask_final)
     dl_dbetas_hat = torch.sum(dl_dbetas_hat, 3):squeeze(3)
     dl_dbetas_hat:cmul(-betas_t)
 
     --compute dl_dkappas
     local dl_dkappas = torch.cmul(epsilon, u_expanded - kappas_t_expanded)
-    dl_dkappas:cmul(context_mask_final)
+    --dl_dkappas:cmul(context_mask_final)
     dl_dkappas = torch.sum(dl_dkappas, 3):squeeze(3)
     dl_dkappas:cmul(betas_t)
     dl_dkappas:mul(2)
