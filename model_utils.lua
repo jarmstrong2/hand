@@ -159,11 +159,19 @@ end
 -- (Modification of above.)
 
 function model_utils.clone_many_times_fast(net, T)
+
    local clones = {}
-   local params, gradParams = net:parameters()
-   if params == nil then
-      params = {}
-   end
+    local params, gradParams
+    if net.parameters then
+        params, gradParams = net:parameters()
+        if params == nil then
+            params = {}
+        end
+    end  
+   --local params, gradParams = net:parameters()
+   --if params == nil then
+   --   params = {}
+   --end
    local paramsNoGrad
    if net.parametersNoGrad then
       paramsNoGrad = net:parametersNoGrad()
@@ -176,19 +184,20 @@ function model_utils.clone_many_times_fast(net, T)
       local reader = torch.MemoryFile(mem:storage(), "r"):binary()
       local clone = reader:readObject()
       reader:close()
-      local cloneParams, cloneGradParams = clone:parameters()
-      local cloneParamsNoGrad
-      for i = 1, #params do
-         cloneParams[i]:set(torch.Tensor():typeAs(params[i]))
-         cloneGradParams[i]:set(torch.Tensor():typeAs(gradParams[i]))
+      if net.parameters then
+          local cloneParams, cloneGradParams = clone:parameters()
+          local cloneParamsNoGrad
+          for i = 1, #params do
+             cloneParams[i]:set(torch.Tensor():typeAs(params[i]))
+             cloneGradParams[i]:set(torch.Tensor():typeAs(gradParams[i]))
+          end
+          if paramsNoGrad then
+             cloneParamsNoGrad = clone:parametersNoGrad()
+             for i =1,#paramsNoGrad do
+                cloneParamsNoGrad[i]:set(torch.Tensor():typeAs(paramsNoGrad[i]))
+             end
+          end
       end
-      if paramsNoGrad then
-         cloneParamsNoGrad = clone:parametersNoGrad()
-         for i =1,#paramsNoGrad do
-            cloneParamsNoGrad[i]:set(torch.Tensor():typeAs(paramsNoGrad[i]))
-         end
-      end
-
       mem:close()
       mem = torch.MemoryFile("w"):binary()
       mem:writeObject(clone)
@@ -201,21 +210,25 @@ function model_utils.clone_many_times_fast(net, T)
       local reader = torch.MemoryFile(mem:storage(), "r"):binary()
       local clone = reader:readObject()
       reader:close()
-      local cloneParams, cloneGradParams = clone:parameters()
-      local cloneParamsNoGrad
-      for i = 1, #params do
-         cloneParams[i]:set(params[i])
-         cloneGradParams[i]:set(gradParams[i])
-      end
-      if paramsNoGrad then
-         cloneParamsNoGrad = clone:parametersNoGrad()
-         for i =1,#paramsNoGrad do
-            cloneParamsNoGrad[i]:set(paramsNoGrad[i])
-         end
+      if net.parameters then
+          local cloneParams, cloneGradParams = clone:parameters()
+          local cloneParamsNoGrad
+          for i = 1, #params do
+             cloneParams[i]:set(params[i])
+             cloneGradParams[i]:set(gradParams[i])
+          end
+          if paramsNoGrad then
+             cloneParamsNoGrad = clone:parametersNoGrad()
+             for i =1,#paramsNoGrad do
+                cloneParamsNoGrad[i]:set(paramsNoGrad[i])
+             end
+          end
       end
       clones[t] = clone
-      collectgarbage()
+      --collectgarbage()
+      --print(t)
    end
+   collectgarbage()
    mem:close()
    return clones
 end
