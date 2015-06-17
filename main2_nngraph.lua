@@ -1,7 +1,7 @@
 require 'getBatch'
 --params:uniform(-0.08, 0.08)
 sampleSize = 4
-numberOfPasses = 4
+numberOfPasses = 8
 
 -- LSTM initial state (zero initially, but final state gets sent to initial state when we do BPTT)
 initstate_h1_c = torch.zeros(sampleSize, 400):cuda()
@@ -45,8 +45,8 @@ function feval(x)
         count = getBatch(count, handwritingdata, sampleSize)
         ------------------------------------------------------------
 
-        if maxLen > 1000 then
-            maxLen = 1000
+        if maxLen > MAXLEN then
+            maxLen = MAXLEN
         end
 
         -- initialize window to first char in all elements of the batch
@@ -84,8 +84,9 @@ function feval(x)
             -- criterion 
             clones.criterion[t]:setmask(cmaskMat[{{},{},{t}}]:cuda())
             loss = clones.criterion[t]:forward(output_y[t], x_target:cuda()) + loss
+            --print('inner loop ',loss)        
         end
-        
+        print('current pass ',loss)        
         elems = (elementCount - sampleSize) + elems
         
         -- backward
@@ -170,13 +171,13 @@ function feval(x)
 end
 
 losses = {} -- TODO: local
-local optim_state = {learningRate = 1e-6, alpha = 0.95, epsilon = 1e-4}
+local optim_state = {learningRate = 1e-4, alpha = 0.95, epsilon = 1e-4}
 local iterations = 8000
 for i = 1, iterations do
     local _, loss = optim.rmsprop(feval, params, optim_state)
     losses[#losses + 1] = loss[1]
 
-    print(loss[1])
+    print('update param, loss:',loss[1])
 
     if i % 5 == 0 then
         torch.save("alexnet.t7", model)
