@@ -55,13 +55,13 @@ function YHat:updateGradInput(input, gradOutput)
     local d_sigma_2_t = gradOutput[{{},{82,101}}]
     local d_rho_t = gradOutput[{{},{102,121}}]
 
-    local grad_e_t = self.e_t_act:backward(-hat_e_t, d_e_t)
-    local grad_pi_t = self.pi_t_act:backward(hat_pi_t, d_pi_t)
+    local grad_e_t = d_e_t:clone() --self.e_t_act:backward(-hat_e_t, d_e_t)
+    local grad_pi_t = d_pi_t:clone() --self.pi_t_act:backward(hat_pi_t, d_pi_t)
     local grad_mu_1_t = d_mu_1_t:clone()
     local grad_mu_2_t =  d_mu_2_t:clone()
-    local grad_sigma_1_t = self.sigma_1_t_act:backward(hat_sigma_1_t, d_sigma_1_t)
-    local grad_sigma_2_t = self.sigma_2_t_act:backward(hat_sigma_2_t, d_sigma_2_t)
-    local grad_rho_t = self.rho_t_act:backward(hat_rho_t, d_rho_t)
+    local grad_sigma_1_t = d_sigma_1_t:clone() --self.sigma_1_t_act:backward(hat_sigma_1_t, d_sigma_1_t)
+    local grad_sigma_2_t = d_sigma_2_t:clone() --self.sigma_2_t_act:backward(hat_sigma_2_t, d_sigma_2_t)
+    local grad_rho_t = d_rho_t:clone() --self.rho_t_act:backward(hat_rho_t, d_rho_t)
         
     local grad_input = torch.cat(grad_e_t:float(), grad_pi_t:float())
     grad_input = torch.cat(grad_input, grad_mu_1_t:float())
