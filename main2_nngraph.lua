@@ -78,7 +78,7 @@ function feval(x)
             output_y[t], kappa_prev[t], w[t], lstm_c_h1[t], lstm_h_h1[t],
             lstm_c_h2[t], lstm_h_h2[t], lstm_c_h3[t], lstm_h_h3[t]
         = unpack(clones.rnn_core[t]:forward({x_in:cuda(), cuMat:cuda(), 
-                 kappa_prev[t-1], w[t-1], lstm_c_h1[t-1], lstm_h_h1[t-1],
+                 kappa_prev[t-1], wmaskMat[{{},{},{t}}]:cuda() ,w[t-1], lstm_c_h1[t-1], lstm_h_h1[t-1],
                  lstm_c_h2[t-1], lstm_h_h2[t-1], lstm_c_h3[t-1], lstm_h_h3[t-1]}))
        
             -- criterion 
@@ -110,11 +110,12 @@ function feval(x)
             
             -- criterion
             local grad_crit = clones.criterion[t]:backward(output_y[t], x_target:cuda())
-            
+	    grad_crit:clamp(-100,100)            
+
             -- model
-            _x, _c, dkappa, dh1_w, dlstm_c_h1, dlstm_h_h1,
+            _x, _c, dkappa, _mask, dh1_w, dlstm_c_h1, dlstm_h_h1,
             dlstm_c_h2, dlstm_h_h2, dlstm_c_h3, dlstm_h_h3 = unpack(clones.rnn_core[t]:backward({x_in:cuda(), cuMat:cuda(), 
-                 kappa_prev[t-1], w[t-1], lstm_c_h1[t-1], lstm_h_h1[t-1],
+                 kappa_prev[t-1], wmaskMat[{{},{},{t}}]:cuda(), w[t-1], lstm_c_h1[t-1], lstm_h_h1[t-1],
                  lstm_c_h2[t-1], lstm_h_h2[t-1], lstm_c_h3[t-1], lstm_h_h3[t-1]},
                  {grad_crit, dkappa, dh1_w, dlstm_c_h1, dlstm_h_h1, 
                   dlstm_c_h2, dlstm_h_h2, dlstm_c_h3, dlstm_h_h3 }))
