@@ -1,7 +1,7 @@
 require 'getBatch'
 --params:uniform(-0.08, 0.08)
 sampleSize = 4
-numberOfPasses = 8
+numberOfPasses = 32
 
 -- LSTM initial state (zero initially, but final state gets sent to initial state when we do BPTT)
 initstate_h1_c = torch.zeros(sampleSize, 400):cuda()
