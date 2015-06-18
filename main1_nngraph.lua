@@ -35,12 +35,11 @@ local input_lstm_h2_c = nn.Identity()()
 local input_lstm_h3_h = nn.Identity()()
 local input_lstm_h3_c = nn.Identity()()
 local input_prev_kappa = nn.Identity()()
-local input_mask = nn.Identity()()
 
 local h1 = LSTMH1.lstm()({input_xin, input_w_prev, input_lstm_h1_c, input_lstm_h1_h})
 local h1_c = nn.SelectTable(1)(h1)
 local h1_h = nn.SelectTable(2)(h1)
-local w_output = nn.Window()({nn.Linear(400,30)(h1_h), input_context, input_prev_kappa, input_mask})
+local w_output = nn.Window()({nn.Linear(400,30)(h1_h), input_context, input_prev_kappa})
 local w_vector = nn.SelectTable(1)(w_output)
 local w_kappas_t = nn.SelectTable(2)(w_output)
 local h2 = LSTMHN.lstm()({input_xin, w_vector, h1_h, input_lstm_h2_c, input_lstm_h2_h})
@@ -51,7 +50,7 @@ local h3_c = nn.SelectTable(1)(h3)
 local h3_h = nn.SelectTable(2)(h3)
 local y = nn.YHat()(nn.Linear(1200, 121)(nn.JoinTable(2)({h1_h, h2_h, h3_h})))
 
-model.rnn_core = nn.gModule({input_xin, input_context, input_prev_kappa, input_mask, input_w_prev,  
+model.rnn_core = nn.gModule({input_xin, input_context, input_prev_kappa, input_w_prev,  
                              input_lstm_h1_c, input_lstm_h1_h,
                              input_lstm_h2_c, input_lstm_h2_h,
                              input_lstm_h3_c, input_lstm_h3_h},
