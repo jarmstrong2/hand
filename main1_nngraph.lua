@@ -62,7 +62,7 @@ model.rnn_core = nn.gModule({input_xin, input_context, input_prev_kappa, input_w
                              input_lstm_h1_c, input_lstm_h1_h,
                              input_lstm_h2_c, input_lstm_h2_h,
                              input_lstm_h3_c, input_lstm_h3_h},
-                            {y, w_kappas_t, w_vector, w_phi_t h1_c, h1_h, h2_c, h2_h,
+                            {y, w_kappas_t, w_vector, w_phi_t, h1_c, h1_h, h2_c, h2_h,
                              h3_c, h3_h})
 
 model.rnn_core:cuda()
