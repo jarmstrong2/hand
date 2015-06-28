@@ -23,8 +23,122 @@ dinitkappa = torch.zeros(sampleSize,10)
 
 count = 1
 
+batchCount = nil
+
 function getInitW(cuMat)
     return cuMat[{{},{1},{}}]:squeeze(2)
+end
+
+function makecov(std, rho)
+    covmat = torch.Tensor(2,2)
+    covmat[{{1},{1}}] = torch.pow(std[{{1},{1}}], 2)
+    covmat[{{1},{2}}] = torch.cmul(torch.cmul(std[{{1},{1}}], std[{{1},{2}}]), rho[{{1},{2}}])
+    covmat[{{2},{1}}] = torch.cmul(torch.cmul(std[{{1},{1}}], std[{{1},{2}}]), rho[{{1},{2}}])
+    covmat[{{2},{2}}] = torch.pow(std[{{1},{2}}], 2)
+    return covmat
+end
+
+function getSample(sampleSize, yOutput)
+    sampX = torch.zeros(sampleSize, 3)
+    for i=1,sampleSize do
+        currentY = yOutput[{{i},{}]
+        x_1, x_2, x_3 = _getSample(currentY)
+        sampX[{{i},{1}}] = x_1
+        sampX[{{i},{2}}] = x_2
+        sampX[{{i},{3}}] = x_3
+    end
+    return sampX
+end
+
+function _getSample(yOutput)
+    e_t = input[{{},{1}}]
+    pi_t = input[{{},{2,21}}]
+    mu_1_t = input[{{},{22,41}}]
+    mu_2_t = input[{{},{42,61}}]
+    sigma_1_t = input[{{},{62,81}}]
+    sigma_2_t = input[{{},{82,101}}]
+    rho_t = input[{{},{102,121}}]
+    
+    x_3 = torch.Tensor(1)
+    x_3 = (x_3:bernoulli(e_t:squeeze())):squeeze()
+    
+    chosen_pi = torch.multinomial(pi_t, 1):squeeze()
+
+    curstd = torch.Tensor({{sigma_1_t[{{},{chosen_pi}}]:squeeze(), sigma_2_t[{{},{chosen_pi}}]:squeeze()}})
+    curcor = torch.Tensor({{1, rho_t[{{},{chosen_pi}}]:squeeze()}})
+    curcovmat = makecov(curstd, curcor)
+    curmean = torch.Tensor({{mu_1_t[{{},{chosen_pi}}]:squeeze(), mu_2_t[{{},{chosen_pi}}]:squeeze()}})
+    sample = distributions.mvn.rnd(curmean, curcovmat)
+    x_1 = sample[1]
+    x_2 = sample[2]
+    return x_1, x_2, x_3
+end
+
+function getValLoss()
+    local valnumberOfPasses = 10
+    local valcount = 0
+    local valsampleSize = 4
+    local loss = 0
+    local elems = 0
+    
+    -- add for loop to increase mini-batch size
+    for i=1, valnumberOfPasses do
+
+        --------------------- get mini-batch -----------------------
+        maxLen, strs, inputMat, cuMat, ymaskMat, wmaskMat, cmaskMat, elementCount, 
+        count = getBatch(count, valhandwritingdata, valsampleSize)
+        ------------------------------------------------------------
+
+        if maxLen > MAXLEN then
+            maxLen = MAXLEN
+        end
+
+        -- initialize window to first char in all elements of the batch
+        local w = {[0]=getInitW(cuMat:cuda())}
+
+        local lstm_c_h1 = {[0]=initstate_h1_c} -- internal cell states of LSTM
+        local lstm_h_h1 = {[0]=initstate_h1_h} -- output values of LSTM
+        local lstm_c_h2 = {[0]=initstate_h2_c} -- internal cell states of LSTM
+        local lstm_h_h2 = {[0]=initstate_h2_h} -- output values of LSTM
+        local lstm_c_h3 = {[0]=initstate_h3_c} -- internal cell states of LSTM
+        local lstm_h_h3 = {[0]=initstate_h3_h} -- output values of LSTM
+        
+        local kappa_prev = {[0]=torch.zeros(sampleSize,10):cuda()}
+        
+        local output_h1_w = {}
+        local input_h3_y = {}
+        local output_h3_y = {}
+        local output_y = {}
+        
+        -- forward
+        
+        for t = 1, maxLen - 1 do
+            local x_in = inputMat[{{},{},{t}}]:squeeze(3)
+            local x_target = inputMat[{{},{},{t+1}}]:squeeze(3)
+
+            -- model 
+            output_y[t], kappa_prev[t], w[t], _, lstm_c_h1[t], lstm_h_h1[t],
+            lstm_c_h2[t], lstm_h_h2[t], lstm_c_h3[t], lstm_h_h3[t]
+        = unpack(clones.rnn_core[t]:forward({x_in:cuda(), cuMat:cuda(), 
+                 kappa_prev[t-1], w[t-1], lstm_c_h1[t-1], lstm_h_h1[t-1],
+                 lstm_c_h2[t-1], lstm_h_h2[t-1], lstm_c_h3[t-1], lstm_h_h3[t-1]}))
+       
+            -- criterion 
+            clones.criterion[t]:setmask(cmaskMat[{{},{},{t}}]:cuda())
+            loss = clones.criterion[t]:forward(output_y[t], x_target:cuda()) + loss        
+        end
+    end
+    return loss
+end
+
+function schedSampBool() 
+    k = 0.9
+    i = batchCount/80.0
+    e_i = k^i
+    -- if we get 1 then don't sample, if 0 then do sample
+    randvar = torch.Tensor(1)
+    result = randvar:bernoulli(e_i):squeeze()
+    return result  
 end
 
 -- do fwd/bwd and return loss, grad_params
@@ -68,12 +182,20 @@ function feval(x)
         
         -- forward
         
-        print('forward')
+        --print('forward')
         
         for t = 1, maxLen - 1 do
-            local x_in = inputMat[{{},{},{t}}]:squeeze()
-            local x_target = inputMat[{{},{},{t+1}}]:squeeze()
+            local x_in = inputMat[{{},{},{t}}]:squeeze(3)
+            local x_target = inputMat[{{},{},{t+1}}]:squeeze(3)
        
+            -- Using Scheduled Sampling
+            -- if returns 1 then don't sample, o.w. do
+            sampleBool = schedSampBool()
+
+            if sampleBool == 0 and t ~= 1 do
+                x_in = getSample(sampleSize, output_y)
+            end
+
             -- model 
             output_y[t], kappa_prev[t], w[t], _, lstm_c_h1[t], lstm_h_h1[t],
             lstm_c_h2[t], lstm_h_h2[t], lstm_c_h3[t], lstm_h_h3[t]
@@ -86,12 +208,12 @@ function feval(x)
             loss = clones.criterion[t]:forward(output_y[t], x_target:cuda()) + loss
             --print('inner loop ',loss)        
         end
-        print('current pass ',loss)        
+        --print('current pass ',loss)        
         elems = (elementCount - sampleSize) + elems
         
         -- backward
         
-        print('backward')
+        --print('backward')
         
         local dlstm_c_h1 = dfinalstate_h1_c
         local dlstm_h_h1 = dfinalstate_h1_h
@@ -174,17 +296,25 @@ end
 losses = {} -- TODO: local
 local optim_state = {learningRate = 1e-4, alpha = 0.95, epsilon = 1e-4}
 local iterations = 8000
+local minValLoss = 1/0
 for i = 1, iterations do
+    batchCount = i
+
     local _, loss = optim.rmsprop(feval, params, optim_state)
     losses[#losses + 1] = loss[1]
 
     print('update param, loss:',loss[1])
 
-    if i % 5 == 0 then
-        torch.save("alexnet.t7", model)
+    if i % 40 == 0 then
+        print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], grad_params:norm()))
+        valLoss = getValLoss()
+        print(string.format("validation loss = %6.8f", valLoss))
+        if minValLoss > valLoss then
+            minValLoss = valLoss
+            torch.save("alexnet.t7", model)
+            print("model")
+        end
         torch.save("losses.t7", losses)
     end
-    if i % 5 == 0 then
-        print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], grad_params:norm()))
-    end
+
 end

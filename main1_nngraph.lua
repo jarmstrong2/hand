@@ -11,12 +11,19 @@ require 'yHatMat2'
 require 'mixtureCriterionMat'
 local model_utils=require 'model_utils'
 require 'cunn'
+require 'distributions'
 
 torch.manualSeed(123)
--- get dataset
-dataFile = torch.DiskFile('data_train.asc', 'r')
+
+-- get training dataset
+dataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
 handwritingdata = dataFile:readObject()
 dataSize = #handwritingdata
+
+-- get validation dataset
+valdataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
+valhandwritingdata = valdataFile:readObject()
+valdataSize = #valhandwritingdata
 
 -- make model
 model = {}
