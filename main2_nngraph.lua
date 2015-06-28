@@ -76,7 +76,7 @@ end
 
 function getValLoss()
     local valnumberOfPasses = 10 --256
-    local valcount = 0
+    local valcount = 1
     local valsampleSize = 4
     local loss = 0
     local elems = 0
