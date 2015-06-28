@@ -41,7 +41,7 @@ end
 function getSample(sampleSize, yOutput)
     sampX = torch.zeros(sampleSize, 3)
     for i=1,sampleSize do
-        currentY = yOutput[{{i},{}]
+        currentY = yOutput[{{i},{}}]
         x_1, x_2, x_3 = _getSample(currentY)
         sampX[{{i},{1}}] = x_1
         sampX[{{i},{2}}] = x_2
