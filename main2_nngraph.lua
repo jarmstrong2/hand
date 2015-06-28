@@ -86,7 +86,7 @@ function getValLoss()
 
         --------------------- get mini-batch -----------------------
         maxLen, strs, inputMat, cuMat, ymaskMat, wmaskMat, cmaskMat, elementCount, 
-        count = getBatch(valcount, valhandwritingdata, valsampleSize)
+        count = getBatch(count, valhandwritingdata, valsampleSize)
         ------------------------------------------------------------
 
         if maxLen > MAXLEN then
