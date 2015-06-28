@@ -75,7 +75,7 @@ function _getSample(input)
 end
 
 function getValLoss()
-    local valnumberOfPasses = 256
+    local valnumberOfPasses = 128
     local valcount = 1
     local valsampleSize = 4
     local loss = 0
@@ -209,12 +209,11 @@ function feval(x)
        
             -- Using Scheduled Sampling
             -- if returns 1 then don't sample, o.w. do
-            sampleBool = schedSampBool()
-            --sampleBool = 0
+            --sampleBool = schedSampBool()
 
-            if sampleBool == 0 and t ~= 1 then
-                x_in = getSample(sampleSize, output_y[t-1])
-            end
+            --if sampleBool == 0 and t ~= 1 then
+            --    x_in = getSample(sampleSize, output_y[t-1])
+            --end
 
             -- model 
             output_y[t], kappa_prev[t], w[t], _, lstm_c_h1[t], lstm_h_h1[t],
@@ -322,11 +321,10 @@ for i = 1, iterations do
     batchCount = i
 
     local _, loss = optim.rmsprop(feval, params, optim_state)
-    losses[#losses + 1] = loss[1]
 
     print('update param, loss:',loss[1])
 
-    if i % 20 == 0 then
+    if i % 80 == 0 then
         print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], grad_params:norm()))
         valLoss = getValLoss()
         vallosses[#vallosses + 1] = valLoss
@@ -336,6 +334,7 @@ for i = 1, iterations do
             torch.save("alexnet.t7", model)
             print("------- Model Saved --------")
         end
+        losses[#losses + 1] = loss[1]
         torch.save("losses.t7", losses)
         torch.save("vallosses.t7", vallosses)
     end
