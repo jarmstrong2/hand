@@ -42,7 +42,6 @@ function getSample(sampleSize, yOutput)
     sampX = torch.zeros(sampleSize, 3)
     for i=1,sampleSize do
         currentY = yOutput[{{i},{}}]
-        print(currentY)
         x_1, x_2, x_3 = _getSample(currentY)
         sampX[{{i},{1}}] = x_1
         sampX[{{i},{2}}] = x_2
@@ -195,7 +194,7 @@ function feval(x)
             sampleBool = 0
 
             if sampleBool == 0 and t ~= 1 then
-                x_in = getSample(sampleSize, output_y)
+                x_in = getSample(sampleSize, output_y[t])
             end
 
             -- model 
