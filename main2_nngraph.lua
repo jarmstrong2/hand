@@ -1,7 +1,7 @@
 require 'getBatch'
 --params:uniform(-0.08, 0.08)
 sampleSize = 4
-numberOfPasses = 4
+numberOfPasses = 32
 
 -- LSTM initial state (zero initially, but final state gets sent to initial state when we do BPTT)
 initstate_h1_c = torch.zeros(sampleSize, 400):cuda()
@@ -75,7 +75,7 @@ function _getSample(input)
 end
 
 function getValLoss()
-    local valnumberOfPasses = 10 --256
+    local valnumberOfPasses = 256
     local valcount = 1
     local valsampleSize = 4
     local loss = 0
@@ -326,7 +326,7 @@ for i = 1, iterations do
 
     print('update param, loss:',loss[1])
 
-    if i % 2 == 0 then
+    if i % 20 == 0 then
         print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], grad_params:norm()))
         valLoss = getValLoss()
         vallosses[#vallosses + 1] = valLoss

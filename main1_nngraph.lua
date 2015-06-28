@@ -16,17 +16,18 @@ require 'distributions'
 torch.manualSeed(123)
 
 -- get training dataset
-dataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
+dataFile = torch.DiskFile('data_train', 'r')
 handwritingdata = dataFile:readObject()
 dataSize = #handwritingdata
 
-print('here')
+print('Uploaded training')
 
 -- get validation dataset
-valdataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
+valdataFile = torch.DiskFile('data_valid', 'r')
 valhandwritingdata = valdataFile:readObject()
 valdataSize = #valhandwritingdata
-print('here2')
+
+print('Uploaded validation')
 
 -- make model
 model = {}
@@ -87,9 +88,9 @@ dfinalstate_h2_c = initstate_h1_c:clone()
 dfinalstate_h2_h = initstate_h1_c:clone()
 
 -- make a bunch of clones, AFTER flattening, as that reallocates memory
-MAXLEN = 10
+MAXLEN = 2000
 clones = {} -- TODO: local
 for name,mod in pairs(model) do
     print('cloning '..name)
-    clones[name] = model_utils.clone_many_times_fast(mod, 10, not mod.parameters)
+    clones[name] = model_utils.clone_many_times_fast(mod, 1999, not mod.parameters)
 end
