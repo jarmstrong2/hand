@@ -324,7 +324,7 @@ for i = 1, iterations do
 
     print('update param, loss:',loss[1])
 
-    if i % 80 == 0 then
+    if i % 20 == 0 then
         print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], grad_params:norm()))
         valLoss = getValLoss()
         vallosses[#vallosses + 1] = valLoss
