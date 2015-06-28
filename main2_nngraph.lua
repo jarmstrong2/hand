@@ -75,7 +75,7 @@ function feval(x)
             local x_target = inputMat[{{},{},{t+1}}]:squeeze()
        
             -- model 
-            output_y[t], kappa_prev[t], w[t], lstm_c_h1[t], lstm_h_h1[t],
+            output_y[t], kappa_prev[t], w[t], _, lstm_c_h1[t], lstm_h_h1[t],
             lstm_c_h2[t], lstm_h_h2[t], lstm_c_h3[t], lstm_h_h3[t]
         = unpack(clones.rnn_core[t]:forward({x_in:cuda(), cuMat:cuda(), 
                  kappa_prev[t-1], w[t-1], lstm_c_h1[t-1], lstm_h_h1[t-1],
@@ -100,7 +100,7 @@ function feval(x)
         local dlstm_c_h3 = dfinalstate_h3_c
         local dlstm_h_h3 = dfinalstate_h3_h
         
-        local dh1_w = torch.zeros(sampleSize, 83):cuda()
+        local dh1_w = torch.zeros(sampleSize, 57):cuda()
         local dkappa = torch.zeros(sampleSize, 10):cuda()
         
         for t = maxLen - 1, 1, -1 do

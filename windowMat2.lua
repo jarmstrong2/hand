@@ -46,7 +46,7 @@ function Window:updateOutput(input)
     
     local output = torch.bmm(phi_t:cuda(), cu_resized:cuda()):squeeze(2)
     
-    self.output = {output, kappas_t}
+    self.output = {output, kappas_t, phi_t}
     
     return self.output
 end
