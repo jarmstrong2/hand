@@ -50,7 +50,7 @@ function getSample(sampleSize, yOutput)
     return sampX
 end
 
-function _getSample(yOutput)
+function _getSample(input)
     e_t = input[{{},{1}}]
     pi_t = input[{{},{2,21}}]
     mu_1_t = input[{{},{22,41}}]
