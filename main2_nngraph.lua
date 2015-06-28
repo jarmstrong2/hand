@@ -193,7 +193,7 @@ function feval(x)
             sampleBool = schedSampBool()
             sampleBool = 0
 
-            if sampleBool == 0 and t ~= 1 do
+            if sampleBool == 0 and t ~= 1 then
                 x_in = getSample(sampleSize, output_y)
             end
 
