@@ -87,7 +87,7 @@ dfinalstate_h2_c = initstate_h1_c:clone()
 dfinalstate_h2_h = initstate_h1_c:clone()
 
 -- make a bunch of clones, AFTER flattening, as that reallocates memory
-MAXLEN = 20
+MAXLEN = 10
 clones = {} -- TODO: local
 for name,mod in pairs(model) do
     print('cloning '..name)
