@@ -47,7 +47,7 @@ function getSample(sampleSize, yOutput)
         sampX[{{i},{2}}] = x_2
         sampX[{{i},{3}}] = x_3
     end
-    return sampX
+    return sampX:cuda()
 end
 
 function _getSample(input)
@@ -62,12 +62,12 @@ function _getSample(input)
     x_3 = torch.Tensor(1)
     x_3 = (x_3:bernoulli(e_t:squeeze())):squeeze()
     
-    chosen_pi = torch.multinomial(pi_t, 1):squeeze()
+    chosen_pi = torch.multinomial(pi_t:double(), 1):squeeze()
 
-    curstd = torch.Tensor({{sigma_1_t[{{},{chosen_pi}}]:squeeze(), sigma_2_t[{{},{chosen_pi}}]:squeeze()}})
-    curcor = torch.Tensor({{1, rho_t[{{},{chosen_pi}}]:squeeze()}})
+    curstd = torch.Tensor({{sigma_1_t[{{},{chosen_pi}}]:squeeze():double(), sigma_2_t[{{},{chosen_pi}}]:squeeze():double()}})
+    curcor = torch.Tensor({{1, rho_t[{{},{chosen_pi}}]:squeeze():double()}})
     curcovmat = makecov(curstd, curcor)
-    curmean = torch.Tensor({{mu_1_t[{{},{chosen_pi}}]:squeeze(), mu_2_t[{{},{chosen_pi}}]:squeeze()}})
+    curmean = torch.Tensor({{mu_1_t[{{},{chosen_pi}}]:squeeze():double(), mu_2_t[{{},{chosen_pi}}]:squeeze():double()}})
     sample = distributions.mvn.rnd(curmean, curcovmat)
     x_1 = sample[1]
     x_2 = sample[2]
