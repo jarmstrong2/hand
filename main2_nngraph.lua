@@ -194,7 +194,7 @@ function feval(x)
             sampleBool = 0
 
             if sampleBool == 0 and t ~= 1 then
-                x_in = getSample(sampleSize, output_y[t])
+                x_in = getSample(sampleSize, output_y[t-1])
             end
 
             -- model 
