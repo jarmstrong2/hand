@@ -64,6 +64,7 @@ function _getSample(input)
     
     chosen_pi = torch.multinomial(pi_t:double(), 1):squeeze()
 
+    print(sigma_1_t)
     curstd = torch.Tensor({{sigma_1_t[{{},{chosen_pi}}]:squeeze():double(), sigma_2_t[{{},{chosen_pi}}]:squeeze():double()}})
     curcor = torch.Tensor({{1, rho_t[{{},{chosen_pi}}]:squeeze():double()}})
     curcovmat = makecov(curstd, curcor)
