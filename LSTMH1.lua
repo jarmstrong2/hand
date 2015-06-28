@@ -1,5 +1,5 @@
 -- adapted from: wojciechz/learning_to_execute on github
-
+--
 local LSTMH1 = {}
 
 -- Creates one timestep of one LSTM
