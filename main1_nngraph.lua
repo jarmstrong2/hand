@@ -20,10 +20,13 @@ dataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
 handwritingdata = dataFile:readObject()
 dataSize = #handwritingdata
 
+print('here')
+
 -- get validation dataset
 valdataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
 valhandwritingdata = valdataFile:readObject()
 valdataSize = #valhandwritingdata
+print('here2')
 
 -- make model
 model = {}
