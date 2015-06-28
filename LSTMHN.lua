@@ -14,7 +14,7 @@ function LSTMHN.lstm()
         -- transforms input
         local i2h            = nn.Linear(3, 400)(x)
         -- transforms window
-        local w2h            = nn.Linear(83, 400)(w)
+        local w2h            = nn.Linear(57, 400)(w)
         -- transforms hidden output from below current hidden layer
         local bh2h            = nn.Linear(400, 400)(below_h)
         -- transforms previous timestep's output

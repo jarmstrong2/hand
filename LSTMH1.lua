@@ -13,7 +13,7 @@ function LSTMH1.lstm()
         -- transforms input
         local i2h            = nn.Linear(3, 400)(x)
         -- transforms window
-        local w2h            = nn.Linear(83, 400)(w)
+        local w2h            = nn.Linear(57, 400)(w)
         -- transforms previous timestep's output
         local h2h            = nn.Linear(400, 400)(prev_h)
         return nn.CAddTable()({i2h, w2h, h2h})
