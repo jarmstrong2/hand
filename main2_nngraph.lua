@@ -240,7 +240,7 @@ function feval(x)
             dlstm_c_h2, dlstm_h_h2, dlstm_c_h3, dlstm_h_h3 = unpack(clones.rnn_core[t]:backward({x_in:cuda(), cuMat:cuda(), 
                  kappa_prev[t-1], w[t-1], lstm_c_h1[t-1], lstm_h_h1[t-1],
                  lstm_c_h2[t-1], lstm_h_h2[t-1], lstm_c_h3[t-1], lstm_h_h3[t-1]},
-                 {grad_crit, dkappa, dh1_w, dlstm_c_h1, dlstm_h_h1, 
+                 {grad_crit, dkappa, dh1_w, _, dlstm_c_h1, dlstm_h_h1, 
                   dlstm_c_h2, dlstm_h_h2, dlstm_c_h3, dlstm_h_h3 }))
 
             -- clip gradients
