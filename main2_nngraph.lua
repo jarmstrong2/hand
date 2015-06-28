@@ -89,7 +89,7 @@ function getValLoss()
         valcount = getBatch(valcount, valhandwritingdata, valsampleSize)
         ------------------------------------------------------------
 
-        print(count)
+        print(valcount)
 
         if maxLen > MAXLEN then
             maxLen = MAXLEN
