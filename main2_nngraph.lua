@@ -75,7 +75,7 @@ function _getSample(input)
 end
 
 function getValLoss()
-    local valnumberOfPasses = 10
+    local valnumberOfPasses = 10 --256
     local valcount = 0
     local valsampleSize = 4
     local loss = 0
@@ -86,8 +86,10 @@ function getValLoss()
 
         --------------------- get mini-batch -----------------------
         maxLen, strs, inputMat, cuMat, ymaskMat, wmaskMat, cmaskMat, elementCount, 
-        count = getBatch(count, valhandwritingdata, valsampleSize)
+        valcount = getBatch(valcount, valhandwritingdata, valsampleSize)
         ------------------------------------------------------------
+
+        print(count)
 
         if maxLen > MAXLEN then
             maxLen = MAXLEN
@@ -127,6 +129,25 @@ function getValLoss()
             clones.criterion[t]:setmask(cmaskMat[{{},{},{t}}]:cuda())
             loss = clones.criterion[t]:forward(output_y[t], x_target:cuda()) + loss        
         end
+
+        maxLen = nil
+        strs = nil
+        inputMat = nil 
+        maskMat = nil
+        cuMat = nil
+        w = nil
+        lstm_c_h1 = nil -- internal cell states of LSTM
+        lstm_h_h1 = nil -- output values of LSTM
+        lstm_c_h2 = nil -- internal cell states of LSTM
+        lstm_h_h2 = nil -- output values of LSTM
+        lstm_c_h3 = nil -- internal cell states of LSTM
+        lstm_h_h3 = nil -- output values of LSTM
+        kappa_prev = nil
+        output_h1_w = nil
+        input_h3_y = nil
+        output_h3_y = nil
+        output_y = nil
+        collectgarbage()
     end
     return loss
 end
@@ -294,7 +315,8 @@ function feval(x)
     return loss, grad_params
 end
 
-losses = {} -- TODO: local
+losses = {} 
+vallosses = {}
 local optim_state = {learningRate = 1e-4, alpha = 0.95, epsilon = 1e-4}
 local iterations = 8000
 local minValLoss = 1/0
@@ -309,6 +331,7 @@ for i = 1, iterations do
     if i % 2 == 0 then
         print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], grad_params:norm()))
         valLoss = getValLoss()
+        vallosses[#vallosses + 1] = valLoss
         print(string.format("validation loss = %6.8f", valLoss))
         if minValLoss > valLoss then
             minValLoss = valLoss
@@ -316,6 +339,7 @@ for i = 1, iterations do
             print("------- Model Saved --------")
         end
         torch.save("losses.t7", losses)
+        torch.save("vallosses.t7", vallosses)
     end
 
 end
