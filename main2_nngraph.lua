@@ -1,7 +1,7 @@
 require 'getBatch'
 --params:uniform(-0.08, 0.08)
 sampleSize = 4
-numberOfPasses = 32
+numberOfPasses = 4
 
 -- LSTM initial state (zero initially, but final state gets sent to initial state when we do BPTT)
 initstate_h1_c = torch.zeros(sampleSize, 400):cuda()
@@ -86,7 +86,7 @@ function getValLoss()
 
         --------------------- get mini-batch -----------------------
         maxLen, strs, inputMat, cuMat, ymaskMat, wmaskMat, cmaskMat, elementCount, 
-        count = getBatch(count, valhandwritingdata, valsampleSize)
+        count = getBatch(valcount, valhandwritingdata, valsampleSize)
         ------------------------------------------------------------
 
         if maxLen > MAXLEN then
