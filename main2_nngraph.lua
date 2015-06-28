@@ -182,7 +182,7 @@ function feval(x)
         
         -- forward
         
-        --print('forward')
+        print('forward')
         
         for t = 1, maxLen - 1 do
             local x_in = inputMat[{{},{},{t}}]:squeeze(3)
@@ -191,6 +191,7 @@ function feval(x)
             -- Using Scheduled Sampling
             -- if returns 1 then don't sample, o.w. do
             sampleBool = schedSampBool()
+            sampleBool = 0
 
             if sampleBool == 0 and t ~= 1 do
                 x_in = getSample(sampleSize, output_y)
@@ -208,12 +209,12 @@ function feval(x)
             loss = clones.criterion[t]:forward(output_y[t], x_target:cuda()) + loss
             --print('inner loop ',loss)        
         end
-        --print('current pass ',loss)        
+        print('current pass ',loss)        
         elems = (elementCount - sampleSize) + elems
         
         -- backward
         
-        --print('backward')
+        print('backward')
         
         local dlstm_c_h1 = dfinalstate_h1_c
         local dlstm_h_h1 = dfinalstate_h1_h
