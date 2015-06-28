@@ -191,7 +191,7 @@ function feval(x)
             -- Using Scheduled Sampling
             -- if returns 1 then don't sample, o.w. do
             sampleBool = schedSampBool()
-            sampleBool = 0
+            --sampleBool = 0
 
             if sampleBool == 0 and t ~= 1 then
                 x_in = getSample(sampleSize, output_y[t-1])
@@ -306,14 +306,14 @@ for i = 1, iterations do
 
     print('update param, loss:',loss[1])
 
-    if i % 40 == 0 then
+    if i % 2 == 0 then
         print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], grad_params:norm()))
         valLoss = getValLoss()
         print(string.format("validation loss = %6.8f", valLoss))
         if minValLoss > valLoss then
             minValLoss = valLoss
             torch.save("alexnet.t7", model)
-            print("model")
+            print("------- Model Saved --------")
         end
         torch.save("losses.t7", losses)
     end
