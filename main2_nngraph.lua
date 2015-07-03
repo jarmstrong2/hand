@@ -80,9 +80,15 @@ function getValLoss()
     local valsampleSize = 4
     local loss = 0
     local elems = 0
-    
+    local gpu_nl = 1
     -- add for loop to increase mini-batch size
     for i=1, valnumberOfPasses do
+
+        if gpu_nl == 4 then
+            gpu_nl = 1
+        end
+
+        cutorch.setDevice(gpu_n) 
 
         --------------------- get mini-batch -----------------------
         maxLen, strs, inputMat, cuMat, ymaskMat, wmaskMat, cmaskMat, elementCount, 
@@ -146,7 +152,10 @@ function getValLoss()
         output_h3_y = nil
         output_y = nil
         collectgarbage()
+        gpu_nl = gpu_nl + 1
     end
+    cutorch.synchronize()
+    cutorch.setDevice(1)
     return loss
 end
 
@@ -169,9 +178,16 @@ function feval(x)
     
     local loss = 0
     local elems = 0
-    
+    local gpu_n = 1
+
     -- add for loop to increase mini-batch size
     for i=1, numberOfPasses do
+
+        if gpu_n == 4 then
+            gpu_n = 1
+        end
+
+        cutorch.setDevice(gpu_n)
 
         --------------------- get mini-batch -----------------------
         maxLen, strs, inputMat, cuMat, ymaskMat, wmaskMat, cmaskMat, elementCount, 
@@ -301,8 +317,13 @@ function feval(x)
         output_h3_y = nil
         output_y = nil
         collectgarbage()
+        gpu_n = gpu_n + 1
     end
     
+    cutorch.synchronize()
+
+    cutorch.setDevice(1)
+
     grad_params:div(numberOfPasses)
     
     -- clip gradient element-wise
