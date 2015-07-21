@@ -16,14 +16,16 @@ require 'distributions'
 torch.manualSeed(123)
 
 -- get training dataset
-dataFile = torch.DiskFile('data_train.asc', 'r')
+--dataFile = torch.DiskFile('data_train.asc', 'r')
+dataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
 handwritingdata = dataFile:readObject()
 dataSize = #handwritingdata
 
 print('Uploaded training')
 
 -- get validation dataset
-valdataFile = torch.DiskFile('data_valid.asc', 'r')
+--valdataFile = torch.DiskFile('data_valid.asc', 'r')
+valdataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
 valhandwritingdata = valdataFile:readObject()
 valdataSize = #valhandwritingdata
 
