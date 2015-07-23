@@ -11,12 +11,25 @@ require 'yHatMat2'
 require 'mixtureCriterionMat'
 local model_utils=require 'model_utils'
 require 'cunn'
+require 'distributions'
 
 torch.manualSeed(123)
--- get dataset
-dataFile = torch.DiskFile('data_train.asc', 'r')
+
+-- get training dataset
+--dataFile = torch.DiskFile('data_train.asc', 'r')
+dataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
 handwritingdata = dataFile:readObject()
 dataSize = #handwritingdata
+
+print('Uploaded training')
+
+-- get validation dataset
+--valdataFile = torch.DiskFile('data_valid.asc', 'r')
+valdataFile = torch.DiskFile('data_norm_mean_toy.asc', 'r')
+valhandwritingdata = valdataFile:readObject()
+valdataSize = #valhandwritingdata
+
+print('Uploaded validation')
 
 -- make model
 model = {}
@@ -42,6 +55,7 @@ local h1_h = nn.SelectTable(2)(h1)
 local w_output = nn.Window()({nn.Linear(400,30)(h1_h), input_context, input_prev_kappa})
 local w_vector = nn.SelectTable(1)(w_output)
 local w_kappas_t = nn.SelectTable(2)(w_output)
+local w_phi_t = nn.SelectTable(3)(w_output)
 local h2 = LSTMHN.lstm()({input_xin, w_vector, h1_h, input_lstm_h2_c, input_lstm_h2_h})
 local h2_c = nn.SelectTable(1)(h2)
 local h2_h = nn.SelectTable(2)(h2)
@@ -54,7 +68,7 @@ model.rnn_core = nn.gModule({input_xin, input_context, input_prev_kappa, input_w
                              input_lstm_h1_c, input_lstm_h1_h,
                              input_lstm_h2_c, input_lstm_h2_h,
                              input_lstm_h3_c, input_lstm_h3_h},
-                            {y, w_kappas_t, w_vector, h1_c, h1_h, h2_c, h2_h,
+                            {y, w_kappas_t, w_vector, w_phi_t, h1_c, h1_h, h2_c, h2_h,
                              h3_c, h3_h})
 
 model.rnn_core:cuda()
