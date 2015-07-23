@@ -1,7 +1,7 @@
 require 'getBatch'
 --params:uniform(-0.08, 0.08)
-sampleSize = 4
-numberOfPasses = 32
+sampleSize = opt.batchSize
+numberOfPasses = opt.numPasses
 
 -- LSTM initial state (zero initially, but final state gets sent to initial state when we do BPTT)
 initstate_h1_c = torch.zeros(sampleSize, 400):cuda()
@@ -75,9 +75,9 @@ function _getSample(input)
 end
 
 function getValLoss()
-    local valnumberOfPasses = 128
+    local valnumberOfPasses = opt.numPasses
     local valcount = 1
-    local valsampleSize = 4
+    local valsampleSize = opt.batchSize
     local loss = 0
     local elems = 0
     
@@ -223,6 +223,7 @@ function feval(x)
                  lstm_c_h2[t-1], lstm_h_h2[t-1], lstm_c_h3[t-1], lstm_h_h3[t-1]}))
        
             -- criterion 
+            --print(cmaskMat:clone():sum(3):squeeze())
             clones.criterion[t]:setmask(cmaskMat[{{},{},{t}}]:cuda())
             loss = clones.criterion[t]:forward(output_y[t], x_target:cuda()) + loss
             --print('inner loop ',loss)        
@@ -314,16 +315,15 @@ end
 
 losses = {} 
 vallosses = {}
-local optim_state = {learningRate = 1e-4, alpha = 0.95, epsilon = 1e-4}
+local optim_state = {learningRate = opt.lr, alpha = 0.95, epsilon = 1e-6}
 local iterations = 8000
 local minValLoss = 1/0
 for i = 1, iterations do
     batchCount = i
 
-    local _, loss = optim.rmsprop(feval, params, optim_state)
+    local _, loss = optim.adam(feval, params, optim_state)
 
-    print('update param, loss:',loss[1])
-
+    print(string.format("update param, loss = %6.8f, gradnorm = %6.4e", loss[1], grad_params:clone():norm()))
     if i % 20 == 0 then
         print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], grad_params:norm()))
         valLoss = getValLoss()

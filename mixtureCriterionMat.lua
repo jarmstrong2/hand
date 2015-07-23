@@ -76,7 +76,7 @@ function MixtureCriterion:updateOutput(input, target)
     result:cmul(self.mask)
     result = result:sum()
     if self.sizeAverage then
-        result = result/target:size(1)
+        result = result/self.mask:sum()--target:size(1)
     end
     
     return result
