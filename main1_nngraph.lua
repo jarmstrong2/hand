@@ -12,8 +12,19 @@ require 'mixtureCriterionMat'
 local model_utils=require 'model_utils'
 require 'cunn'
 require 'distributions'
-
 torch.manualSeed(123)
+local cmd = torch.CmdLine()
+cmd:text()
+cmd:text('Script for training sequence model.')
+
+cmd:option('-lr' , 1e-4, 'learning rate')
+cmd:option('-maxlen' , 100, 'max sequence length')
+cmd:option('-batchSize' , 4, 'mini batch size')
+cmd:option('-numPasses' , 1, 'number of passes')
+
+cmd:text()
+opt = cmd:parse(arg)
+
 
 -- get training dataset
 --dataFile = torch.DiskFile('data_train.asc', 'r')
@@ -75,7 +86,7 @@ model.rnn_core:cuda()
 params, grad_params = model.rnn_core:getParameters()
 
 --params, grad_params = model_utils.combine_all_parameters(model.h1, model.h1_w, model.w, model.h2, model.h3, model.h3_y, model.y)
-params:uniform(-0.08, 0.08)
+--params:uniform(-0.08, 0.08)
 
 -- LSTM initial state (zero initially, but final state gets sent to initial state when we do BPTT)
 initstate_h1_c = torch.zeros(1, 400):cuda()
@@ -90,9 +101,10 @@ dfinalstate_h2_c = initstate_h1_c:clone()
 dfinalstate_h2_h = initstate_h1_c:clone()
 
 -- make a bunch of clones, AFTER flattening, as that reallocates memory
-MAXLEN = 1000
+MAXLEN = opt.maxlen
 clones = {} -- TODO: local
 for name,mod in pairs(model) do
     print('cloning '..name)
-    clones[name] = model_utils.clone_many_times_fast(mod, 999, not mod.parameters)
+    clones[name] = model_utils.clone_many_times_fast(mod, MAXLEN-1, not mod.parameters)
 end
+print('start training')

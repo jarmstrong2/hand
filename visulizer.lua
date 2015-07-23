@@ -1,18 +1,20 @@
 require 'nn'
+require 'cunn'
 require 'torch'
 require 'nngraph'
---require 'windowMat2_nocuda'
---require 'yHatMat2_nocuda'
-require 'windowMat2'
-require 'yHatMat2'
+require 'windowMat2_nocuda'
+require 'yHatMat2_nocuda'
+--require 'windowMat2'
+--require 'yHatMat2'
 require 'parsevocab'
 require 'distributions'
+require 'mixtureCriterionMat'
 local LSTMH1 = require 'LSTMH1'
 local LSTMHN = require 'LSTMHN'
 
 -- change model name here ---
-model = torch.load('alexnetd.t7')
-
+model = torch.load('alexnet.t7')
+model.rnn_core:float()
 -- change test string here --
 cu = getOneHotStrs({[1]="jimmy"})
 
