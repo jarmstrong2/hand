@@ -1,3 +1,4 @@
+require 'gnuplot'
 require 'nn'
 require 'cunn'
 require 'torch'
@@ -14,9 +15,9 @@ local LSTMHN = require 'LSTMHN'
 
 -- change model name here ---
 model = torch.load('alexnet.t7')
-model.rnn_core:float()
+model.rnn_core:double()
 -- change test string here --
-cu = getOneHotStrs({[1]="jimmy"})
+cu = getOneHotStrs({[1]="life Peers is to be made at a"})
 
 --print(cu)
 iteration = 1000

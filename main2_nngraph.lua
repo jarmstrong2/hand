@@ -4,7 +4,7 @@ sampleSize = opt.batchSize
 numberOfPasses = opt.numPasses
 
 -- LSTM initial state (zero initially, but final state gets sent to initial state when we do BPTT)
-initstate_h1_c = torch.zeros(sampleSize, 400):cuda()
+initstate_h1_c = torch.zeros(sampleSize, opt.hiddenSize):cuda()
 initstate_h1_h = initstate_h1_c:clone()
 initstate_h2_c = initstate_h1_c:clone()
 initstate_h2_h = initstate_h1_c:clone()

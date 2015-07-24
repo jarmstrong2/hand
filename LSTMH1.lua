@@ -3,7 +3,7 @@
 local LSTMH1 = {}
 
 -- Creates one timestep of one LSTM
-function LSTMH1.lstm()
+function LSTMH1.lstm(inputSize, hiddenSize)
     local x = nn.Identity()()
     local w = nn.Identity()()
     local prev_c = nn.Identity()()
@@ -11,11 +11,11 @@ function LSTMH1.lstm()
 
     function new_input_sum()
         -- transforms input
-        local i2h            = nn.Linear(3, 400)(x)
+        local i2h            = nn.Linear(inputSize, hiddenSize)(x)
         -- transforms window
-        local w2h            = nn.Linear(57, 400)(w)
+        local w2h            = nn.Linear(57, hiddenSize)(w)
         -- transforms previous timestep's output
-        local h2h            = nn.Linear(400, 400)(prev_h)
+        local h2h            = nn.Linear(hiddenSize, hiddenSize)(prev_h)
         return nn.CAddTable()({i2h, w2h, h2h})
     end
 
