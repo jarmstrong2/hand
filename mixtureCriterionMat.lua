@@ -6,7 +6,7 @@ function MixtureCriterion:setmask(mask)
 end
 
 function MixtureCriterion:setSizeAverage()
-   self.sizeAverage = false 
+   self.sizeAverage = true 
 end
 
 function MixtureCriterion:updateOutput(input, target)
