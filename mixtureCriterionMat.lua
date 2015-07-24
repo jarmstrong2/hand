@@ -74,7 +74,7 @@ function MixtureCriterion:updateOutput(input, target)
     local result = log_mixdist_sum + log_e_t
     result:mul(-1)
     result:cmul(self.mask)
-    result = result:sum(2)
+    result = result:sum(1)
     if self.sizeAverage then
         result = result/target:size(1)
     end
