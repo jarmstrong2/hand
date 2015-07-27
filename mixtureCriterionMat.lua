@@ -25,8 +25,8 @@ function MixtureCriterion:updateOutput(input, target)
     
     local sampleSize = (#input)[1]
     
-    local inv_sigma1 = torch.pow(sigma_1_t, -1)
-    local inv_sigma2 = torch.pow(sigma_2_t, -1)
+    local inv_sigma1 = torch.pow(sigma_1_t + (10^-15), -1)
+    local inv_sigma2 = torch.pow(sigma_2_t + (10^-15), -1)
     
     local mixdist1 = torch.cmul(inv_sigma1, inv_sigma2)
     mixdist1:cmul(torch.pow((-(torch.pow(rho_t, 2)) + 1), -0.5))
@@ -99,11 +99,11 @@ function MixtureCriterion:updateGradInput(input, target)
     
     --responsibilities will separate calculation into gamma1 and gamma2
     
-    local inv_sigma1 = torch.pow(sigma_1_t, -1)
-    local inv_sigma2 = torch.pow(sigma_2_t, -1)
+    local inv_sigma1 = torch.pow(sigma_1_t + (10^-15), -1)
+    local inv_sigma2 = torch.pow(sigma_2_t + (10^-15), -1)
     
     local gamma1 = torch.cmul(inv_sigma1, inv_sigma2)
-    gamma1:cmul(torch.pow((-(torch.pow(rho_t, 2)) + 1), -0.5))
+    gamma1:cmul(torch.pow((-(torch.pow(rho_t, 2)) + 1 + (10^-15)), -0.5))
     gamma1:mul(1/(2*math.pi))
     
     local mu_1_x_1 = (mu_1_t:clone()):mul(-1)
@@ -126,11 +126,12 @@ function MixtureCriterion:updateGradInput(input, target)
     
     local gamma2 = z:clone()
     gamma2:mul(-1)
-    gamma2:cmul(torch.pow((-(torch.pow(rho_t, 2)) + 1):mul(2), -1))
+    gamma2:cmul(torch.pow((-(torch.pow(rho_t, 2)) + 1 + (10^-15)):mul(2), -1))
     gamma2:exp()
     local gamma = torch.cmul(gamma1, gamma2)
     gamma:cmul(pi_t)
     local gamma_sum = torch.sum(gamma, 2)
+    gamma_sum:add(10^-15)
 
     local gamma_sum_val = gamma_sum:expand(sampleSize, 20)
     gamma:cmul(torch.pow(gamma_sum_val, -1))
@@ -142,7 +143,7 @@ function MixtureCriterion:updateGradInput(input, target)
     
     local dl_hat_pi_t = pi_t - gamma
     
-    local c = torch.pow((-torch.pow(rho_t, 2)):add(1), -1)
+    local c = torch.pow((-torch.pow(rho_t, 2)):add(1 + 10^-15), -1)
     
     local c_sigma1 = torch.cmul(c, inv_sigma1)
     local x1_mu1_sigma1 = torch.cmul(mu_1_x_1, inv_sigma1)
