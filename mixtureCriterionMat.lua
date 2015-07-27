@@ -178,12 +178,12 @@ function MixtureCriterion:updateGradInput(input, target)
     local dl_hat_rho_t = dl_hat_rho_t + rho_cz
     dl_hat_rho_t:cmul(-gamma)
 
-    local grad_input = torch.cat(dl_hat_e_t:double(), dl_hat_pi_t:double())
-    grad_input = torch.cat(grad_input, dl_hat_mu_1_t:double())
-    grad_input = torch.cat(grad_input, dl_hat_mu_2_t:double())
-    grad_input = torch.cat(grad_input, dl_hat_sigma_1_t:double())
-    grad_input = torch.cat(grad_input, dl_hat_sigma_2_t:double())
-    grad_input = torch.cat(grad_input, dl_hat_rho_t:double())
+    local grad_input = torch.cat(dl_hat_e_t:float(), dl_hat_pi_t:float())
+    grad_input = torch.cat(grad_input, dl_hat_mu_1_t:float())
+    grad_input = torch.cat(grad_input, dl_hat_mu_2_t:float())
+    grad_input = torch.cat(grad_input, dl_hat_sigma_1_t:float())
+    grad_input = torch.cat(grad_input, dl_hat_sigma_2_t:float())
+    grad_input = torch.cat(grad_input, dl_hat_rho_t:float())
     
     self.gradInput = grad_input:cuda()
     self.gradInput:cmul(self.mask:reshape(self.mask:size(1),1):expand(self.gradInput:size()))
