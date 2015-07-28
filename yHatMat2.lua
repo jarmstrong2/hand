@@ -12,7 +12,7 @@ function YHat:updateOutput(input)
     local hat_rho_t = input[{{},{102,121}}]
 
     self.e_t_act = self.e_t_act or nn.Sigmoid():cuda()
-    self.pi_t_act = self.pi_t_act or nn.Sigmoid():cuda()
+    self.pi_t_act = self.pi_t_act or nn.SoftMax():cuda()
     self.sigma_1_t_act = self.sigma_1_t_act or nn.Exp():cuda()
     self.sigma_2_t_act = self.sigma_2_t_act or nn.Exp():cuda()
     self.rho_t_act = self.rho_t_act or nn.Tanh():cuda()
