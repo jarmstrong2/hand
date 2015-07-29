@@ -23,7 +23,7 @@ cmd:option('-lr' , 1e-4, 'learning rate')
 cmd:option('-maxlen' , 100, 'max sequence length')
 cmd:option('-batchSize' , 4, 'mini batch size')
 cmd:option('-numPasses' , 1, 'number of passes')
-
+cmd:option('-maxiter', 8000, 'maximum number of iterations')
 cmd:text()
 opt = cmd:parse(arg)
 

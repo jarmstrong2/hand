@@ -316,7 +316,7 @@ end
 losses = {} 
 vallosses = {}
 local optim_state = {learningRate = opt.lr, alpha = 0.95, epsilon = 1e-6}
-local iterations = 8000
+local iterations = opt.maxiter
 local minValLoss = 1/0
 for i = 1, iterations do
     batchCount = i

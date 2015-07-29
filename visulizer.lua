@@ -17,9 +17,10 @@ local LSTMHN = require 'LSTMHN'
 model = torch.load('alexnet.t7')
 model.rnn_core:double()
 -- change test string here --
--- cu = getOneHotStrs({[1]="life Peers is to be made at a"})
- cu = getOneHotStrs({[1]="from nomnating any more Labour"})
+cu = getOneHotStrs({[1]="life Peers is to be made at a"})
+-- cu = getOneHotStrs({[1]="from nomnating any more Labour"})
 -- cu = getOneHotStrs({[1]="A MOVE to stop Mr . Gaitskell"})
+-- cu = getOneHotStrs({[1]="jimmy"})
 
 --print(cu)
 iteration = 1000
