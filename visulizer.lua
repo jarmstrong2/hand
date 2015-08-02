@@ -82,7 +82,11 @@ function getX(input)
     end
     --chosen_pi = choice[randChoice]
     --print(chosen_pi)
+    
+    
+    --Jimmy uncomment next line if you want to use argmax
     --chosen_pi=index
+    
     --print(chosen_pi)
     
     curstd = torch.Tensor({{sigma_1_t[{{},{chosen_pi}}]:squeeze(), sigma_2_t[{{},{chosen_pi}}]:squeeze()}})
