@@ -58,7 +58,14 @@ function getX(input)
     rho_t = input[{{},{102,121}}]
     
     x_3 = torch.Tensor(1)
-    x_3 = (x_3:bernoulli(e_t:squeeze())):squeeze()
+    --x_3 = (x_3:bernoulli(e_t:squeeze())):squeeze()
+    
+    -- Threshold for end of stroke
+    if e_t:squeeze() > 0.5 then
+        x_3 = 1
+    else
+        x_3 = 0
+    end
     
     choice = {}
     
@@ -81,21 +88,23 @@ function getX(input)
         end
     end
     --chosen_pi = choice[randChoice]
-    --print(chosen_pi)
     
-    
-    --Jimmy uncomment next line if you want to use argmax
-    --chosen_pi=index
-    
-    --print(chosen_pi)
+    --Max component value
+    chosen_pi=index
     
     curstd = torch.Tensor({{sigma_1_t[{{},{chosen_pi}}]:squeeze(), sigma_2_t[{{},{chosen_pi}}]:squeeze()}})
     curcor = torch.Tensor({{1, rho_t[{{},{chosen_pi}}]:squeeze()}})
     curcovmat = makecov(curstd, curcor)
     curmean = torch.Tensor({{mu_1_t[{{},{chosen_pi}}]:squeeze(), mu_2_t[{{},{chosen_pi}}]:squeeze()}})
     sample = distributions.mvn.rnd(curmean, curcovmat)
-    x_1 = sample[1]
-    x_2 = sample[2]
+    
+    -- Max sample
+    x_1 = mu_1_t[{{},{chosen_pi}}]:squeeze()
+    x_2 = mu_2_t[{{},{chosen_pi}}]:squeeze()
+    
+    -- Gaussian bivariate sample
+    --x_1 = sample[1]
+    --x_2 = sample[2]
     
     table.insert(x_val, x_1)
     table.insert(y_val, x_2)
