@@ -3,7 +3,7 @@
 local LSTMHN = {}
 
 -- Creates one timestep of one LSTM
-function LSTMHN.lstm(inputSize, hiddenSize)
+function LSTMHN.lstm(inputSize, hiddenSize, windowSize)
     local x = nn.Identity()()
     local w = nn.Identity()()
     local below_h = nn.Identity()()
@@ -14,7 +14,7 @@ function LSTMHN.lstm(inputSize, hiddenSize)
         -- transforms input
         local i2h            = nn.Linear(inputSize, hiddenSize)(x)
         -- transforms window
-        local w2h            = nn.Linear(57, hiddenSize)(w)
+        local w2h            = nn.Linear(windowSize, hiddenSize)(w)
         -- transforms hidden output from below current hidden layer
         local bh2h            = nn.Linear(hiddenSize, hiddenSize)(below_h)
         -- transforms previous timestep's output

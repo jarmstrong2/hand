@@ -1,5 +1,4 @@
 require 'getBatch'
---params:uniform(-0.08, 0.08)
 sampleSize = opt.batchSize
 numberOfPasses = opt.numPasses
 
@@ -18,8 +17,8 @@ dfinalstate_h2_c = initstate_h1_c:clone()
 dfinalstate_h2_h = initstate_h1_c:clone()
 dfinalstate_h3_c = initstate_h1_c:clone()
 dfinalstate_h3_h = initstate_h1_c:clone()
-initkappa = torch.randn(sampleSize,10)
-dinitkappa = torch.zeros(sampleSize,10)
+initkappa = torch.randn(sampleSize,opt.nWindow)
+dinitkappa = torch.zeros(sampleSize,opt.nWindow)
 
 count = 1
 
@@ -103,7 +102,7 @@ function getValLoss()
         local lstm_c_h3 = {[0]=initstate_h3_c} -- internal cell states of LSTM
         local lstm_h_h3 = {[0]=initstate_h3_h} -- output values of LSTM
         
-        local kappa_prev = {[0]=torch.zeros(sampleSize,10):cuda()}
+        local kappa_prev = {[0]=torch.zeros(sampleSize,opt.nWindow):cuda()}
         
         local output_h1_w = {}
         local input_h3_y = {}
@@ -192,7 +191,7 @@ function feval(x)
         local lstm_c_h3 = {[0]=initstate_h3_c} -- internal cell states of LSTM
         local lstm_h_h3 = {[0]=initstate_h3_h} -- output values of LSTM
         
-        local kappa_prev = {[0]=torch.zeros(sampleSize,10):cuda()}
+        local kappa_prev = {[0]=torch.zeros(sampleSize,opt.nWindow):cuda()}
         
         local output_h1_w = {}
         local input_h3_y = {}
@@ -242,8 +241,8 @@ function feval(x)
         local dlstm_c_h3 = dfinalstate_h3_c
         local dlstm_h_h3 = dfinalstate_h3_h
         
-        local dh1_w = torch.zeros(sampleSize, 57):cuda()
-        local dkappa = torch.zeros(sampleSize, 10):cuda()
+        local dh1_w = torch.zeros(sampleSize, opt.windowSize):cuda()
+        local dkappa = torch.zeros(sampleSize, opt.nWindow):cuda()
         
         for t = maxLen - 1, 1, -1 do
         
@@ -331,7 +330,7 @@ for i = 1, iterations do
         print(string.format("validation loss = %6.8f", valLoss))
         if minValLoss > valLoss then
             minValLoss = valLoss
-            torch.save("alexnet.t7", model)
+            torch.save(opt.savefile, model)
             print("------- Model Saved --------")
         end
         losses[#losses + 1] = loss[1]
